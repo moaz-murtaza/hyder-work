@@ -1,0 +1,40 @@
+{
+  "name": "business-simulation-platform",
+  "version": "1.0.0",
+  "description": "Multi-team, multi-round competitive business simulation platform with multi-port architecture",
+  "main": "server-admin.js",
+  "scripts": {
+    "start": "node server-admin.js",
+    "admin": "node server-admin.js",
+    "team1": "node server-team.js 1",
+    "team2": "node server-team.js 2",
+    "team3": "node server-team.js 3",
+    "team4": "node server-team.js 4",
+    "team5": "node server-team.js 5",
+    "team6": "node server-team.js 6",
+    "team7": "node server-team.js 7",
+    "team8": "node server-team.js 8",
+    "start-all": "start-all.bat"
+  },
+  "keywords": [
+    "business",
+    "simulation",
+    "education",
+    "strategic-management",
+    "multi-port"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "body-parser": "^1.20.2",
+    "cookie-parser": "^1.4.6",
+    "csv-parse": "^5.6.0",
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "sqlite3": "^5.1.6"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

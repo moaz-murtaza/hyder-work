@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Business Simulation</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="dashboard">
+    <nav class="navbar">
+      <div class="navbar-brand">Business Simulation - Admin Dashboard</div>
+      <div class="navbar-info">
+        <span class="navbar-user">Administrator</span>
+        <button class="btn btn-secondary" onclick="logout()">Logout</button>
+      </div>
+    </nav>
+
+    <div class="container">
+      <!-- Simulation Status -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Simulation Status</div>
+          <div class="stat-value" id="simStatus">Loading...</div>
+          <div class="stat-subtitle" id="simSubtitle"></div>
+        </div>
+        <div class="stat-card success">
+          <div class="stat-label">Current Round</div>
+          <div class="stat-value" id="currentRound">0</div>
+          <div class="stat-subtitle">of <span id="totalRounds">8</span> rounds</div>
+        </div>
+        <div class="stat-card warning">
+          <div class="stat-label">Active Teams</div>
+          <div class="stat-value" id="activeTeams">0</div>
+          <div class="stat-subtitle">teams competing</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Decisions Submitted</div>
+          <div class="stat-value" id="submittedCount">0</div>
+          <div class="stat-subtitle">of <span id="requiredCount">0</span> required</div>
+        </div>
+      </div>
+
+      <!-- Control Panel -->
+      <div class="card">
+        <div class="card-header">Simulation Controls</div>
+        <div id="controlPanel"></div>
+      </div>
+
+      <!-- Teams Overview -->
+      <div class="card">
+        <div class="card-header">Teams Overview</div>
+        <div id="teamsOverview">
+          <div class="loading">Loading teams data...</div>
+        </div>
+      </div>
+
+      <!-- Current Round Decisions -->
+      <div class="card" id="decisionsCard" style="display: none;">
+        <div class="card-header">Current Round Decisions</div>
+        <div id="decisionsOverview"></div>
+      </div>
+
+      <!-- Results & Reports -->
+      <div class="card" id="resultsCard" style="display: none;">
+        <div class="card-header">Round Results & Comparative Report</div>
+        <div class="mb-3">
+          <label>View Results for Round:</label>
+          <select id="resultsRoundSelect" onchange="loadResults()">
+            <option value="">Select Round</option>
+          </select>
+        </div>
+        <div id="resultsDisplay"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>

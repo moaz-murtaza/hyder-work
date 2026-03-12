@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Team Dashboard - Business Simulation</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="dashboard">
+    <nav class="navbar">
+      <div class="navbar-brand">
+        <span id="companyName">Business Simulation</span>
+      </div>
+      <div class="navbar-info">
+        <span class="navbar-user" id="teamName">Team Dashboard</span>
+        <button class="btn btn-secondary" onclick="logout()">Logout</button>
+      </div>
+    </nav>
+
+    <div class="container">
+      <!-- Company Status -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Current Round</div>
+          <div class="stat-value" id="currentRound">0</div>
+          <div class="stat-subtitle" id="roundStatus">Waiting to start</div>
+        </div>
+        <div class="stat-card success">
+          <div class="stat-label">Cash Balance</div>
+          <div class="stat-value" id="cashBalance">$0</div>
+          <div class="stat-subtitle">Available funds</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Equity</div>
+          <div class="stat-value" id="totalEquity">$0</div>
+          <div class="stat-subtitle">Company value</div>
+        </div>
+        <div class="stat-card warning">
+          <div class="stat-label">Market Share</div>
+          <div class="stat-value" id="marketShare">-</div>
+          <div class="stat-subtitle">Previous round</div>
+        </div>
+      </div>
+
+      <!-- Decision Form -->
+      <div class="card" id="decisionCard">
+        <div class="card-header">Round <span id="decisionRound">-</span> Decisions</div>
+        
+        <div id="bankruptMessage" class="error-message" style="display: none;">
+          Your company is bankrupt and cannot make decisions.
+        </div>
+        
+        <div id="waitingMessage" class="mb-3" style="display: none;">
+          <p>Waiting for administrator to start the simulation...</p>
+        </div>
+
+        <div id="successMessage" class="success-message"></div>
+        <div id="errorMessage" class="error-message"></div>
+        
+        <form id="decisionsForm" style="display: none;">
+          <div class="decision-form">
+            <!-- Marketing Decisions -->
+            <div class="form-section">
+              <h3>📈 Marketing</h3>
+              <div class="form-group">
+                <label>Product Price ($)</label>
+                <input type="number" id="price" min="10" max="500" step="0.01" value="100" required>
+              </div>
+              <div class="form-group">
+                <label>Advertising Expenditure ($)</label>
+                <input type="number" id="advertising" min="0" step="1000" value="50000" required>
+              </div>
+              <div class="form-group">
+                <label>Sales Force Expenditure ($)</label>
+                <input type="number" id="salesForce" min="0" step="1000" value="30000" required>
+              </div>
+              <div class="form-group">
+                <label>Quality Investment ($)</label>
+                <input type="number" id="qualityInvestment" min="0" step="1000" value="20000" required>
+              </div>
+              <div class="form-group">
+                <label>Market Research ($)</label>
+                <input type="number" id="marketResearch" min="0" step="1000" value="10000" required>
+              </div>
+            </div>
+
+            <!-- Production Decisions -->
+            <div class="form-section">
+              <h3>🏭 Production</h3>
+              <div class="form-group">
+                <label>Production Volume (units)</label>
+                <input type="number" id="productionVolume" min="0" step="100" value="8000" required>
+                <small class="text-muted">Current capacity: <span id="capacityInfo">-</span> units</small>
+              </div>
+              <div class="form-group">
+                <label>Capacity Expansion ($)</label>
+                <input type="number" id="capacityExpansion" min="0" step="10000" value="0" required>
+                <small class="text-muted">$30 per unit of new capacity</small>
+              </div>
+            </div>
+
+            <!-- HR Decisions -->
+            <div class="form-section">
+              <h3>👥 Human Resources</h3>
+              <div class="form-group">
+                <label>Hire Employees</label>
+                <input type="number" id="employeesHire" min="0" step="1" value="0" required>
+              </div>
+              <div class="form-group">
+                <label>Fire Employees</label>
+                <input type="number" id="employeesFire" min="0" step="1" value="0" required>
+                <small class="text-muted">Current: <span id="employeesInfo">-</span> employees</small>
+              </div>
+              <div class="form-group">
+                <label>Monthly Wage Level ($)</label>
+                <input type="number" id="wageLevel" min="1500" max="10000" step="100" value="2500" required>
+              </div>
+              <div class="form-group">
+                <label>Training Investment ($)</label>
+                <input type="number" id="trainingInvestment" min="0" step="1000" value="5000" required>
+              </div>
+            </div>
+
+            <!-- Finance Decisions -->
+            <div class="form-section">
+              <h3>💰 Finance</h3>
+              <div class="form-group">
+                <label>Short-Term Borrowing ($)</label>
+                <input type="number" id="shortTermBorrow" min="0" step="10000" value="0" required>
+                <small class="text-muted">Interest: 8% annual</small>
+              </div>
+              <div class="form-group">
+                <label>Long-Term Borrowing ($)</label>
+                <input type="number" id="longTermBorrow" min="0" step="10000" value="0" required>
+                <small class="text-muted">Interest: 6% annual</small>
+              </div>
+              <div class="form-group">
+                <label>Short-Term Repayment ($)</label>
+                <input type="number" id="shortTermRepay" min="0" step="10000" value="0" required>
+                <small class="text-muted">Current: $<span id="stDebtInfo">-</span></small>
+              </div>
+              <div class="form-group">
+                <label>Long-Term Repayment ($)</label>
+                <input type="number" id="longTermRepay" min="0" step="10000" value="0" required>
+                <small class="text-muted">Current: $<span id="ltDebtInfo">-</span></small>
+              </div>
+              <div class="form-group">
+                <label>Dividend Payout ($)</label>
+                <input type="number" id="dividendPayout" min="0" step="1000" value="0" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="action-buttons">
+            <button type="button" class="btn btn-secondary" onclick="saveDraft()">Save Draft</button>
+            <button type="submit" class="btn btn-success">Submit Decisions</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Previous Round Results -->
+      <div class="card" id="resultsCard" style="display: none;">
+        <div class="card-header">Round <span id="resultsRound">-</span> Results</div>
+        <div id="resultsContent"></div>
+      </div>
+
+      <!-- Performance History -->
+      <div class="card" id="historyCard" style="display: none;">
+        <div class="card-header">Performance History</div>
+        <div id="historyContent"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="team.js"></script>
+</body>
+</html>

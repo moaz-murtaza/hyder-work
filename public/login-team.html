@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Team Login - Business Simulation Platform</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-box">
+      <div class="login-header">
+        <h1>Team Portal</h1>
+        <p id="portInfo">Business Simulation Platform - Team Dashboard</p>
+      </div>
+      
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" required autofocus>
+        </div>
+        
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required>
+        </div>
+        
+        <div id="errorMessage" class="error-message"></div>
+        
+        <button type="submit" class="btn btn-primary btn-block">Login to Team Dashboard</button>
+      </form>
+      
+      <div class="login-info">
+        <h3>Team Access:</h3>
+        <p><strong>Username:</strong> team1, team2, team3, etc.</p>
+        <p><strong>Password:</strong> password</p>
+        <hr style="margin: 15px 0; border: none; border-top: 1px solid #e1e8ed;">
+        <p style="font-size: 12px; color: #888;"><strong>Note:</strong> Each team has their own server port. Make sure you're on the correct port for your team.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Detect current port and update UI
+    const currentPort = window.location.port;
+    const teamNumber = currentPort ? parseInt(currentPort) - 2999 : 1; // 3000 = Team 1, 3001 = Team 2, etc.
+    
+    if (teamNumber >= 1 && teamNumber <= 8) {
+      document.getElementById('portInfo').textContent = `Team ${teamNumber} Dashboard - Port ${currentPort}`;
+      document.getElementById('username').value = `team${teamNumber}`;
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const errorMessage = document.getElementById('errorMessage');
+      
+      errorMessage.textContent = '';
+      
+      // Check if username matches expected team for this port
+      if (teamNumber >= 1 && teamNumber <= 8) {
+        if (username !== `team${teamNumber}`) {
+          errorMessage.textContent = `This server is for Team ${teamNumber}. Please login at the correct port.`;
+          return;
+        }
+      }
+      
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username, password })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          if (data.role === 'team') {
+            window.location.href = '/team';
+          } else {
+            errorMessage.textContent = 'This is a team portal. Admins should login at port 5000.';
+          }
+        } else {
+          errorMessage.textContent = data.error || 'Login failed';
+        }
+      } catch (error) {
+        errorMessage.textContent = 'Connection error. Please try again.';
+        console.error('Login error:', error);
+      }
+    });
+
+    // Check if already logged in
+    async function checkSession() {
+      try {
+        const response = await fetch('/api/auth/session');
+        const data = await response.json();
+        
+        if (data.authenticated && data.role === 'team') {
+          window.location.href = '/team';
+        }
+      } catch (error) {
+        console.error('Session check error:', error);
+      }
+    }
+
+    checkSession();
+  </script>
+</body>
+</html>

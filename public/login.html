@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Business Simulation Platform</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-box">
+      <div class="login-header">
+        <h1>Business Simulation Platform</h1>
+        <p>Multi-Team Competitive Business Strategy Simulation</p>
+      </div>
+      
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" required autofocus>
+        </div>
+        
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required>
+        </div>
+        
+        <div id="errorMessage" class="error-message"></div>
+        
+        <button type="submit" class="btn btn-primary btn-block">Login</button>
+      </form>
+      
+      <div class="login-info">
+        <h3>Default Credentials:</h3>
+        <p><strong>Administrator:</strong> admin / admin123</p>
+        <p><strong>Teams:</strong> team1-8 / password</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="login.js"></script>
+</body>
+</html>
