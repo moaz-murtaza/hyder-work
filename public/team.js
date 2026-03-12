@@ -8,11 +8,11 @@ async function init() {
   setupFormHandlers();
 }
 
-// Check authentication - with localStorage caching
+// Check authentication - with tab-scoped sessionStorage caching
 async function checkAuth() {
   try {
-    // First check localStorage for cached auth state
-    const cachedAuth = localStorage.getItem('auth');
+    // First check sessionStorage for cached auth state (current tab only)
+    const cachedAuth = sessionStorage.getItem('auth');
     if (cachedAuth) {
       const auth = JSON.parse(cachedAuth);
       teamNumber = auth.teamNumber;
@@ -28,8 +28,8 @@ async function checkAuth() {
       teamNumber = data.teamNumber;
       document.getElementById('teamName').textContent = `Team ${teamNumber}`;
       
-      // Cache auth state in localStorage
-      localStorage.setItem('auth', JSON.stringify({
+      // Cache auth state in sessionStorage (tab-scoped)
+      sessionStorage.setItem('auth', JSON.stringify({
         authenticated: true,
         role: data.role,
         teamNumber: data.teamNumber
@@ -41,7 +41,7 @@ async function checkAuth() {
   } catch (error) {
     console.error('Auth check error:', error);
     // Don't redirect on error, use cached auth if available
-    const cachedAuth = localStorage.getItem('auth');
+    const cachedAuth = sessionStorage.getItem('auth');
     if (!cachedAuth) {
       window.location.href = '/';
     }
@@ -53,12 +53,12 @@ async function logout() {
   try {
     await fetch('/api/auth/logout', { method: 'POST' });
     // Clear cached auth state
-    localStorage.removeItem('auth');
+    sessionStorage.removeItem('auth');
     window.location.href = '/';
   } catch (error) {
     console.error('Logout error:', error);
     // Clear cache anyway
-    localStorage.removeItem('auth');
+    sessionStorage.removeItem('auth');
     window.location.href = '/';
   }
 }
@@ -274,7 +274,8 @@ async function submitDecisions(submit) {
     if (response.ok) {
       successEl.textContent = data.message;
       if (submit) {
-        setTimeout(() => location.reload(), 2000);
+        // Refresh dashboard data in-place without full page reload.
+        await loadDashboard();
       }
     } else {
       errorEl.textContent = data.error;
@@ -363,10 +364,12 @@ function formatNumber(num) {
   return Math.round(num).toLocaleString();
 }
 
-// Auto-refresh every 30 seconds
+// Auto-refresh every 90 seconds when user is on this tab.
 setInterval(() => {
-  loadDashboard();
-}, 30000);
+  if (document.visibilityState === 'visible') {
+    loadDashboard();
+  }
+}, 90000);
 
 // Initialize on load
 init();

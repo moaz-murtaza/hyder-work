@@ -19,8 +19,8 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     const data = await response.json();
     
     if (response.ok) {
-      // Cache auth state in localStorage
-      localStorage.setItem('auth', JSON.stringify({
+      // Cache auth state per tab only
+      sessionStorage.setItem('auth', JSON.stringify({
         authenticated: true,
         role: data.role,
         username: data.username,
@@ -45,8 +45,8 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 // Check if already logged in
 async function checkSession() {
   try {
-    // First check localStorage
-    const cachedAuth = localStorage.getItem('auth');
+    // First check sessionStorage (tab-scoped)
+    const cachedAuth = sessionStorage.getItem('auth');
     if (cachedAuth) {
       const auth = JSON.parse(cachedAuth);
       if (auth.authenticated) {
@@ -65,7 +65,7 @@ async function checkSession() {
     
     if (data.authenticated) {
       // Cache it
-      localStorage.setItem('auth', JSON.stringify({
+      sessionStorage.setItem('auth', JSON.stringify({
         authenticated: true,
         role: data.role,
         username: data.username,

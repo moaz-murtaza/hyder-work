@@ -12,15 +12,35 @@ async function init() {
 // Check authentication
 async function checkAuth() {
   try {
+    const cachedAuth = sessionStorage.getItem('auth');
+    if (cachedAuth) {
+      const auth = JSON.parse(cachedAuth);
+      if (auth.authenticated && auth.role === 'admin') {
+        return;
+      }
+    }
+
     const response = await fetch('/api/auth/session');
     const data = await response.json();
     
+    if (data.authenticated && data.role === 'admin') {
+      sessionStorage.setItem('auth', JSON.stringify({
+        authenticated: true,
+        role: data.role,
+        username: data.username
+      }));
+      return;
+    }
+
     if (!data.authenticated || data.role !== 'admin') {
       window.location.href = '/';
     }
   } catch (error) {
     console.error('Auth check error:', error);
-    window.location.href = '/';
+    const cachedAuth = sessionStorage.getItem('auth');
+    if (!cachedAuth) {
+      window.location.href = '/';
+    }
   }
 }
 
@@ -28,9 +48,12 @@ async function checkAuth() {
 async function logout() {
   try {
     await fetch('/api/auth/logout', { method: 'POST' });
+    sessionStorage.removeItem('auth');
     window.location.href = '/';
   } catch (error) {
     console.error('Logout error:', error);
+    sessionStorage.removeItem('auth');
+    window.location.href = '/';
   }
 }
 
