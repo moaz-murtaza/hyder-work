@@ -29,9 +29,22 @@ app.use(session({
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
+function getTabToken(req) {
+  return req.get('x-tab-token') || req.body?.tabToken || req.query?.tabToken;
+}
+
+function getTabAuth(req) {
+  if (!req.session || !req.session.tabAuth) return null;
+  const tabToken = getTabToken(req);
+  if (!tabToken) return null;
+  return req.session.tabAuth[tabToken] || null;
+}
+
 // Authentication middleware
 function requireAuth(req, res, next) {
-  if (req.session && req.session.userId) {
+  const auth = getTabAuth(req);
+  if (auth && auth.userId) {
+    req.auth = auth;
     next();
   } else {
     res.status(401).json({ error: 'Unauthorized. Please login.' });
@@ -39,7 +52,7 @@ function requireAuth(req, res, next) {
 }
 
 function requireAdmin(req, res, next) {
-  if (req.session && req.session.role === 'admin') {
+  if (req.auth && req.auth.role === 'admin') {
     next();
   } else {
     res.status(403).json({ error: 'Forbidden. Admin access required.' });
@@ -47,7 +60,7 @@ function requireAdmin(req, res, next) {
 }
 
 function requireTeam(req, res, next) {
-  if (req.session && req.session.role === 'team') {
+  if (req.auth && req.auth.role === 'team') {
     next();
   } else {
     res.status(403).json({ error: 'Forbidden. Team access required.' });
@@ -70,19 +83,11 @@ app.get('/', (req, res) => {
 });
 
 app.get('/admin', (req, res) => {
-  if (req.session && req.session.role === 'admin') {
-    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
-  } else {
-    res.redirect('/');
-  }
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
 app.get('/team', (req, res) => {
-  if (req.session && req.session.role === 'team') {
-    res.sendFile(path.join(__dirname, 'public', 'team.html'));
-  } else {
-    res.redirect('/');
-  }
+  res.sendFile(path.join(__dirname, 'public', 'team.html'));
 });
 
 // Error handling middleware

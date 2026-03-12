@@ -21,17 +21,29 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: { 
-    secure: false,
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    secure: false
   }
 }));
 
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
+function getTabToken(req) {
+  return req.get('x-tab-token') || req.body?.tabToken || req.query?.tabToken;
+}
+
+function getTabAuth(req) {
+  if (!req.session || !req.session.tabAuth) return null;
+  const tabToken = getTabToken(req);
+  if (!tabToken) return null;
+  return req.session.tabAuth[tabToken] || null;
+}
+
 // Authentication middleware
 function requireAuth(req, res, next) {
-  if (req.session && req.session.userId) {
+  const auth = getTabAuth(req);
+  if (auth && auth.userId) {
+    req.auth = auth;
     next();
   } else {
     res.status(401).json({ error: 'Unauthorized. Please login.' });
@@ -39,7 +51,7 @@ function requireAuth(req, res, next) {
 }
 
 function requireAdmin(req, res, next) {
-  if (req.session && req.session.role === 'admin') {
+  if (req.auth && req.auth.role === 'admin') {
     next();
   } else {
     res.status(403).json({ error: 'Forbidden. Admin access required.' });
@@ -60,11 +72,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/admin', (req, res) => {
-  if (req.session && req.session.role === 'admin') {
-    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
-  } else {
-    res.redirect('/');
-  }
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
 // Error handling middleware

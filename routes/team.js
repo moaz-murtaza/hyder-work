@@ -80,7 +80,7 @@ function validateDecisions(decisions, team) {
 // Get team dashboard data
 router.get('/dashboard', async (req, res) => {
   try {
-    const teamNumber = req.session.teamNumber;
+    const teamNumber = req.auth.teamNumber;
     
     const [state, team, currentDecision] = await Promise.all([
       db.get('SELECT * FROM simulation_state WHERE id = 1'),
@@ -112,7 +112,7 @@ router.get('/dashboard', async (req, res) => {
 // Get team entry values for a specific round (reference data from CSV)
 router.get('/entry-data/:roundNumber', async (req, res) => {
   try {
-    const teamNumber = req.session.teamNumber;
+    const teamNumber = req.auth.teamNumber;
     const { roundNumber } = req.params;
 
     const entryData = teamDataManager.getTeamData(teamNumber, parseInt(roundNumber));
@@ -135,7 +135,7 @@ router.get('/entry-data/:roundNumber', async (req, res) => {
 // Submit/Update decisions
 router.post('/submit-decisions', async (req, res) => {
   try {
-    const teamNumber = req.session.teamNumber;
+    const teamNumber = req.auth.teamNumber;
     const state = await db.get('SELECT * FROM simulation_state WHERE id = 1');
 
     if (state.status !== 'in_progress') {
@@ -218,7 +218,7 @@ router.post('/submit-decisions', async (req, res) => {
 // Get team's decisions for a specific round
 router.get('/decisions/:roundNumber', async (req, res) => {
   try {
-    const teamNumber = req.session.teamNumber;
+    const teamNumber = req.auth.teamNumber;
     const { roundNumber } = req.params;
 
     const decision = await db.get(
@@ -236,7 +236,7 @@ router.get('/decisions/:roundNumber', async (req, res) => {
 // Get team's results for a specific round
 router.get('/results/:roundNumber', async (req, res) => {
   try {
-    const teamNumber = req.session.teamNumber;
+    const teamNumber = req.auth.teamNumber;
     const { roundNumber } = req.params;
 
     const report = await financials.generateCompleteReport(teamNumber, parseInt(roundNumber));
@@ -255,7 +255,7 @@ router.get('/results/:roundNumber', async (req, res) => {
 // Get historical performance data
 router.get('/history', async (req, res) => {
   try {
-    const teamNumber = req.session.teamNumber;
+    const teamNumber = req.auth.teamNumber;
     const state = await db.get('SELECT * FROM simulation_state WHERE id = 1');
 
     if (state.current_round < 2) {
@@ -278,7 +278,7 @@ router.get('/history', async (req, res) => {
 // Get team information
 router.get('/info', async (req, res) => {
   try {
-    const teamNumber = req.session.teamNumber;
+    const teamNumber = req.auth.teamNumber;
     
     const team = await db.get('SELECT * FROM teams WHERE team_number = ?', [teamNumber]);
     
@@ -292,7 +292,7 @@ router.get('/info', async (req, res) => {
 // Update company name
 router.post('/update-company-name', async (req, res) => {
   try {
-    const teamNumber = req.session.teamNumber;
+    const teamNumber = req.auth.teamNumber;
     const { companyName } = req.body;
 
     if (!companyName || companyName.trim().length === 0) {

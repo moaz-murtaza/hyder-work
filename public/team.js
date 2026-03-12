@@ -1,6 +1,24 @@
 let dashboardData = null;
 let teamNumber = null;
 
+const TAB_TOKEN_KEY = 'tabToken';
+
+function getOrCreateTabToken() {
+  let token = sessionStorage.getItem(TAB_TOKEN_KEY);
+  if (!token) {
+    token = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    sessionStorage.setItem(TAB_TOKEN_KEY, token);
+  }
+  return token;
+}
+
+const originalFetch = window.fetch.bind(window);
+window.fetch = (url, options = {}) => {
+  const headers = new Headers(options.headers || {});
+  headers.set('x-tab-token', getOrCreateTabToken());
+  return originalFetch(url, { ...options, headers });
+};
+
 // Initialize dashboard
 async function init() {
   await checkAuth();
@@ -20,14 +38,21 @@ async function checkAuth() {
 
     const auth = JSON.parse(cachedAuth);
     if (auth.authenticated && auth.role === 'team' && auth.teamNumber) {
-      teamNumber = auth.teamNumber;
-      document.getElementById('teamName').textContent = `Team ${teamNumber}`;
-      return;
+      const response = await fetch('/api/auth/session');
+      const sessionState = await response.json();
+
+      if (sessionState.authenticated && sessionState.role === 'team') {
+        teamNumber = auth.teamNumber;
+        document.getElementById('teamName').textContent = `Team ${teamNumber}`;
+        return;
+      }
     }
 
+    sessionStorage.removeItem('auth');
     window.location.href = '/';
   } catch (error) {
     console.error('Auth check error:', error);
+    sessionStorage.removeItem('auth');
     window.location.href = '/';
   }
 }
@@ -51,6 +76,12 @@ async function logout() {
 async function loadDashboard() {
   try {
     const response = await fetch('/api/team/dashboard');
+    if (response.status === 401 || response.status === 403) {
+      sessionStorage.removeItem('auth');
+      window.location.href = '/';
+      return;
+    }
+
     dashboardData = await response.json();
     
     await updateDashboard();

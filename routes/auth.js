@@ -3,13 +3,18 @@ const bcrypt = require('bcrypt');
 const router = express.Router();
 const db = require('../data/database');
 
+function getTabToken(req) {
+  return req.get('x-tab-token') || req.body?.tabToken || req.query?.tabToken;
+}
+
 // Login endpoint
 router.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
+    const tabToken = getTabToken(req);
 
-    if (!username || !password) {
-      return res.status(400).json({ error: 'Username and password are required' });
+    if (!username || !password || !tabToken) {
+      return res.status(400).json({ error: 'Username, password, and tab token are required' });
     }
 
     // Find user
@@ -29,11 +34,15 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // Set session
-    req.session.userId = user.id;
-    req.session.username = user.username;
-    req.session.role = user.role;
-    req.session.teamNumber = user.team_number;
+    // Set tab-scoped auth context in session
+    req.session.tabAuth = req.session.tabAuth || {};
+    req.session.tabAuth[tabToken] = {
+      userId: user.id,
+      username: user.username,
+      role: user.role,
+      teamNumber: user.team_number,
+      updatedAt: Date.now()
+    };
 
     res.json({
       success: true,
@@ -50,6 +59,37 @@ router.post('/login', async (req, res) => {
 
 // Logout endpoint
 router.post('/logout', (req, res) => {
+  const tabToken = getTabToken(req);
+
+  if (!req.session) {
+    return res.json({ success: true });
+  }
+
+  if (tabToken && req.session.tabAuth && req.session.tabAuth[tabToken]) {
+    delete req.session.tabAuth[tabToken];
+    const activeTabs = Object.keys(req.session.tabAuth).length;
+
+    if (activeTabs === 0) {
+      req.session.destroy((err) => {
+        if (err) {
+          return res.status(500).json({ error: 'Logout failed' });
+        }
+        res.clearCookie('connect.sid');
+        res.json({ success: true });
+      });
+      return;
+    }
+
+    req.session.save((err) => {
+      if (err) {
+        return res.status(500).json({ error: 'Logout failed' });
+      }
+      res.json({ success: true });
+    });
+    return;
+  }
+
+  // Fallback: logout entire session if no tab token is provided
   req.session.destroy((err) => {
     if (err) {
       return res.status(500).json({ error: 'Logout failed' });
@@ -61,12 +101,15 @@ router.post('/logout', (req, res) => {
 
 // Check session endpoint
 router.get('/session', (req, res) => {
-  if (req.session && req.session.userId) {
+  const tabToken = getTabToken(req);
+  const tabAuth = req.session?.tabAuth?.[tabToken];
+
+  if (tabAuth && tabAuth.userId) {
     res.json({
       authenticated: true,
-      role: req.session.role,
-      username: req.session.username,
-      teamNumber: req.session.teamNumber
+      role: tabAuth.role,
+      username: tabAuth.username,
+      teamNumber: tabAuth.teamNumber
     });
   } else {
     res.json({ authenticated: false });

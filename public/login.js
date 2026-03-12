@@ -1,3 +1,21 @@
+const TAB_TOKEN_KEY = 'tabToken';
+
+function getOrCreateTabToken() {
+  let token = sessionStorage.getItem(TAB_TOKEN_KEY);
+  if (!token) {
+    token = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    sessionStorage.setItem(TAB_TOKEN_KEY, token);
+  }
+  return token;
+}
+
+const originalFetch = window.fetch.bind(window);
+window.fetch = (url, options = {}) => {
+  const headers = new Headers(options.headers || {});
+  headers.set('x-tab-token', getOrCreateTabToken());
+  return originalFetch(url, { ...options, headers });
+};
+
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   
@@ -57,6 +75,14 @@ async function checkSession() {
         }
       }
       return;
+    }
+
+    // Validate server-side tab session if any stale cache exists from prior runs.
+    const response = await fetch('/api/auth/session');
+    const data = await response.json();
+
+    if (!data.authenticated) {
+      sessionStorage.removeItem('auth');
     }
   } catch (error) {
     console.error('Session check error:', error);

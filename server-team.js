@@ -24,17 +24,29 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: { 
-    secure: false,
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    secure: false
   }
 }));
 
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
+function getTabToken(req) {
+  return req.get('x-tab-token') || req.body?.tabToken || req.query?.tabToken;
+}
+
+function getTabAuth(req) {
+  if (!req.session || !req.session.tabAuth) return null;
+  const tabToken = getTabToken(req);
+  if (!tabToken) return null;
+  return req.session.tabAuth[tabToken] || null;
+}
+
 // Authentication middleware
 function requireAuth(req, res, next) {
-  if (req.session && req.session.userId) {
+  const auth = getTabAuth(req);
+  if (auth && auth.userId) {
+    req.auth = auth;
     next();
   } else {
     res.status(401).json({ error: 'Unauthorized. Please login.' });
@@ -42,9 +54,9 @@ function requireAuth(req, res, next) {
 }
 
 function requireTeam(req, res, next) {
-  if (req.session && req.session.role === 'team') {
+  if (req.auth && req.auth.role === 'team') {
     // Ensure the user is accessing their own team server
-    if (req.session.teamNumber === teamNumber) {
+    if (req.auth.teamNumber === teamNumber) {
       next();
     } else {
       res.status(403).json({ error: 'Access denied. Wrong team server.' });
@@ -68,11 +80,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/team', (req, res) => {
-  if (req.session && req.session.role === 'team' && req.session.teamNumber === teamNumber) {
-    res.sendFile(path.join(__dirname, 'public', 'team.html'));
-  } else {
-    res.redirect('/');
-  }
+  res.sendFile(path.join(__dirname, 'public', 'team.html'));
 });
 
 // Error handling middleware
