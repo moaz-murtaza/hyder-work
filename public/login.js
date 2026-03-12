@@ -58,26 +58,6 @@ async function checkSession() {
       }
       return;
     }
-
-    // Then check server session
-    const response = await fetch('/api/auth/session');
-    const data = await response.json();
-    
-    if (data.authenticated) {
-      // Cache it
-      sessionStorage.setItem('auth', JSON.stringify({
-        authenticated: true,
-        role: data.role,
-        username: data.username,
-        teamNumber: data.teamNumber
-      }));
-
-      if (data.role === 'admin') {
-        window.location.href = '/admin';
-      } else if (data.role === 'team') {
-        window.location.href = '/team';
-      }
-    }
   } catch (error) {
     console.error('Session check error:', error);
   }

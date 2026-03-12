@@ -13,34 +13,20 @@ async function init() {
 async function checkAuth() {
   try {
     const cachedAuth = sessionStorage.getItem('auth');
-    if (cachedAuth) {
-      const auth = JSON.parse(cachedAuth);
-      if (auth.authenticated && auth.role === 'admin') {
-        return;
-      }
-    }
-
-    const response = await fetch('/api/auth/session');
-    const data = await response.json();
-    
-    if (data.authenticated && data.role === 'admin') {
-      sessionStorage.setItem('auth', JSON.stringify({
-        authenticated: true,
-        role: data.role,
-        username: data.username
-      }));
+    if (!cachedAuth) {
+      window.location.href = '/';
       return;
     }
 
-    if (!data.authenticated || data.role !== 'admin') {
-      window.location.href = '/';
+    const auth = JSON.parse(cachedAuth);
+    if (auth.authenticated && auth.role === 'admin') {
+      return;
     }
+
+    window.location.href = '/';
   } catch (error) {
     console.error('Auth check error:', error);
-    const cachedAuth = sessionStorage.getItem('auth');
-    if (!cachedAuth) {
-      window.location.href = '/';
-    }
+    window.location.href = '/';
   }
 }
 

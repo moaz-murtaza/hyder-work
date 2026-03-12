@@ -11,40 +11,24 @@ async function init() {
 // Check authentication - with tab-scoped sessionStorage caching
 async function checkAuth() {
   try {
-    // First check sessionStorage for cached auth state (current tab only)
-    const cachedAuth = sessionStorage.getItem('auth');
-    if (cachedAuth) {
-      const auth = JSON.parse(cachedAuth);
-      teamNumber = auth.teamNumber;
-      document.getElementById('teamName').textContent = `Team ${teamNumber}`;
-      return; // Use cached auth, skip server check
-    }
-
-    // If no cache, try to get session from server
-    const response = await fetch('/api/auth/session');
-    const data = await response.json();
-    
-    if (data.authenticated && data.role === 'team') {
-      teamNumber = data.teamNumber;
-      document.getElementById('teamName').textContent = `Team ${teamNumber}`;
-      
-      // Cache auth state in sessionStorage (tab-scoped)
-      sessionStorage.setItem('auth', JSON.stringify({
-        authenticated: true,
-        role: data.role,
-        teamNumber: data.teamNumber
-      }));
-    } else {
-      // Only redirect if explicitly not authenticated and no cache
-      window.location.href = '/';
-    }
-  } catch (error) {
-    console.error('Auth check error:', error);
-    // Don't redirect on error, use cached auth if available
+    // Only trust sessionStorage for tab-scoped auth.
     const cachedAuth = sessionStorage.getItem('auth');
     if (!cachedAuth) {
       window.location.href = '/';
+      return;
     }
+
+    const auth = JSON.parse(cachedAuth);
+    if (auth.authenticated && auth.role === 'team' && auth.teamNumber) {
+      teamNumber = auth.teamNumber;
+      document.getElementById('teamName').textContent = `Team ${teamNumber}`;
+      return;
+    }
+
+    window.location.href = '/';
+  } catch (error) {
+    console.error('Auth check error:', error);
+    window.location.href = '/';
   }
 }
 
