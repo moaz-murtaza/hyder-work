@@ -5,12 +5,14 @@ class SimulationEngine {
   constructor() {
     this.TAX_RATE = 0.30;
     this.BASE_UNIT_COST = 40;
-    this.DEPRECIATION_RATE = 0.10;
+    this.ANNUAL_DEPRECIATION_RATE = 0.10;
     this.INVENTORY_HOLDING_COST_RATE = 0.02;
-    this.SHORT_TERM_INTEREST_RATE = 0.08;
-    this.LONG_TERM_INTEREST_RATE = 0.06;
+    this.ANNUAL_SHORT_TERM_INTEREST_RATE = 0.08;
+    this.ANNUAL_LONG_TERM_INTEREST_RATE = 0.06;
     this.TRAINING_PRODUCTIVITY_FACTOR = 0.0001;
     this.QUALITY_DECAY_RATE = 0.05;
+    this.QUARTERS_PER_YEAR = 4;
+    this.MONTHS_PER_QUARTER = 3;
   }
 
   // Main function to process a round
@@ -52,7 +54,7 @@ class SimulationEngine {
         await db.run(
           `INSERT INTO market_conditions (round_number, base_demand, economic_factor, inflation_rate, interest_rate) 
            VALUES (?, ?, ?, ?, ?)`,
-          [roundNumber, 40000, economicFactor, inflationRate, this.SHORT_TERM_INTEREST_RATE]
+          [roundNumber, 40000, economicFactor, inflationRate, this.ANNUAL_SHORT_TERM_INTEREST_RATE]
         );
 
         marketConditions = await db.get(
@@ -207,27 +209,27 @@ class SimulationEngine {
       decision.quality_investment +
       decision.market_research +
       decision.training_investment +
-      (team.employees * decision.wage_level * 12); // Annual wages
+      (team.employees * decision.wage_level * this.MONTHS_PER_QUARTER);
 
     result.operatingExpenses = operatingExpenses;
 
     // Depreciation
-    const depreciation = team.fixed_assets * this.DEPRECIATION_RATE;
+    const depreciation = team.fixed_assets * (this.ANNUAL_DEPRECIATION_RATE / this.QUARTERS_PER_YEAR);
     result.depreciation = depreciation;
 
     // EBIT (Earnings Before Interest and Tax)
     result.ebit = result.grossProfit - result.operatingExpenses - depreciation;
 
     // Interest Expense
-    const newShortTermDebt = team.short_term_debt + decision.short_term_borrow - decision.short_term_repay;
-    const newLongTermDebt = team.long_term_debt + decision.long_term_borrow - decision.long_term_repay;
+    let newShortTermDebt = team.short_term_debt + decision.short_term_borrow - decision.short_term_repay;
+    let newLongTermDebt = team.long_term_debt + decision.long_term_borrow - decision.long_term_repay;
     
     const avgShortTermDebt = (team.short_term_debt + newShortTermDebt) / 2;
     const avgLongTermDebt = (team.long_term_debt + newLongTermDebt) / 2;
     
     const interestExpense = 
-      (avgShortTermDebt * this.SHORT_TERM_INTEREST_RATE) +
-      (avgLongTermDebt * this.LONG_TERM_INTEREST_RATE);
+      (avgShortTermDebt * (this.ANNUAL_SHORT_TERM_INTEREST_RATE / this.QUARTERS_PER_YEAR)) +
+      (avgLongTermDebt * (this.ANNUAL_LONG_TERM_INTEREST_RATE / this.QUARTERS_PER_YEAR));
     
     result.interestExpense = interestExpense;
 
@@ -264,6 +266,16 @@ class SimulationEngine {
     cashFlow -= decision.long_term_repay;
     cashFlow -= decision.dividend_payout;
     cashFlow -= interestExpense;
+
+    // Topaz-style behavior: negative cash is automatically funded by short-term borrowing.
+    if (cashFlow < 0) {
+      const autoOverdraft = -cashFlow;
+      newShortTermDebt += autoOverdraft;
+      result.autoOverdraft = autoOverdraft;
+      cashFlow = 0;
+    } else {
+      result.autoOverdraft = 0;
+    }
 
     result.cashEnd = cashFlow;
 
@@ -306,8 +318,8 @@ class SimulationEngine {
     result.eps = result.netIncome / team.shares_outstanding;
     result.netMargin = result.revenue > 0 ? (result.netIncome / result.revenue) * 100 : 0;
 
-    // Check for bankruptcy
-    result.isBankrupt = result.cashEnd < 0 || result.totalEquity < 0;
+    // In Topaz, companies continue operating even when highly leveraged.
+    result.isBankrupt = false;
 
     return result;
   }

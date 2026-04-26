@@ -76,6 +76,7 @@ router.post('/reset-simulation', async (req, res) => {
 
     // Delete all decisions and results
     await db.run('DELETE FROM decisions');
+    await db.run('DELETE FROM topax_decisions');
     await db.run('DELETE FROM results');
     await db.run('DELETE FROM market_conditions');
 

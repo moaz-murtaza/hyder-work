@@ -12,13 +12,15 @@ class FinancialStatements {
       return null;
     }
 
+    const derivedDepreciation = result.gross_profit - result.operating_expenses - result.ebit;
+
     return {
       roundNumber: roundNumber,
       revenue: result.revenue,
       costOfGoodsSold: result.cogs,
       grossProfit: result.gross_profit,
       operatingExpenses: result.operating_expenses,
-      depreciation: result.operating_expenses * 0.1, // Approximation
+      depreciation: derivedDepreciation,
       ebit: result.ebit,
       interestExpense: result.interest_expense,
       earningsBeforeTax: result.ebit - result.interest_expense,
@@ -101,14 +103,16 @@ class FinancialStatements {
       [teamNumber, roundNumber]
     );
 
+    const derivedDepreciation = currentResult.gross_profit - currentResult.operating_expenses - currentResult.ebit;
+
     return {
       roundNumber: roundNumber,
       operatingActivities: {
         netIncome: currentResult.net_income,
-        depreciation: currentResult.operating_expenses * 0.1,
+        depreciation: derivedDepreciation,
         changesInInventory: previousResult ? 
           (previousResult.inventory_end - currentResult.inventory_end) * 40 : 0,
-        netOperatingCashFlow: currentResult.net_income + (currentResult.operating_expenses * 0.1)
+        netOperatingCashFlow: currentResult.net_income + derivedDepreciation
       },
       investingActivities: {
         capitalExpenditures: decision ? -decision.capacity_expansion : 0,

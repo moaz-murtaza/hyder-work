@@ -91,6 +91,18 @@ class Database {
         UNIQUE(team_number, round_number)
       )`);
 
+      // Topax-native payload table (stores full form payload for parity migration)
+      this.db.run(`CREATE TABLE IF NOT EXISTS topax_decisions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        team_number INTEGER NOT NULL,
+        round_number INTEGER NOT NULL,
+        payload_json TEXT NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+        UNIQUE(team_number, round_number)
+      )`);
+
       // Results table (stores calculated results after each round)
       this.db.run(`CREATE TABLE IF NOT EXISTS results (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

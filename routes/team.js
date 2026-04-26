@@ -202,6 +202,13 @@ router.post('/submit-decisions', async (req, res) => {
       ]
     );
 
+    await db.run(
+      `INSERT OR REPLACE INTO topax_decisions (
+        team_number, round_number, payload_json, updated_at
+      ) VALUES (?, ?, ?, CURRENT_TIMESTAMP)`,
+      [teamNumber, state.current_round, JSON.stringify(req.body)]
+    );
+
     res.json({ 
       success: true, 
       message: submit ? 'Decisions submitted successfully' : 'Decisions saved as draft'
@@ -230,6 +237,28 @@ router.get('/decisions/:roundNumber', async (req, res) => {
   } catch (error) {
     console.error('Error fetching decisions:', error);
     res.status(500).json({ error: 'Failed to fetch decisions' });
+  }
+});
+
+// Get team's full Topax payload for a specific round
+router.get('/topax-decisions/:roundNumber', async (req, res) => {
+  try {
+    const teamNumber = req.auth.teamNumber;
+    const { roundNumber } = req.params;
+
+    const row = await db.get(
+      'SELECT payload_json FROM topax_decisions WHERE team_number = ? AND round_number = ?',
+      [teamNumber, roundNumber]
+    );
+
+    if (!row) {
+      return res.json({});
+    }
+
+    res.json(JSON.parse(row.payload_json));
+  } catch (error) {
+    console.error('Error fetching Topax decisions:', error);
+    res.status(500).json({ error: 'Failed to fetch Topax decisions' });
   }
 });
 
