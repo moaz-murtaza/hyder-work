@@ -38,10 +38,94 @@ function randomStep(min, max, step) {
   return min + randomInt(0, count) * step;
 }
 
+function getInputNumber(id, fallback = 0) {
+  const el = document.getElementById(id);
+  if (!el) return fallback;
+  return numberOr(el.value, fallback);
+}
+
+function getInputBool(id) {
+  const el = document.getElementById(id);
+  return !!(el && el.checked);
+}
+
+function collectTopaxFormData() {
+  const prices = {
+    exportMarket: {
+      product1: getInputNumber('price', 100),
+      product2: getInputNumber('priceP2', 100),
+      product3: getInputNumber('priceP3', 100)
+    },
+    homeMarkets: {
+      product1: getInputNumber('homePriceP1', 100),
+      product2: getInputNumber('homePriceP2', 100),
+      product3: getInputNumber('homePriceP3', 100)
+    }
+  };
+
+  const promotionExpenditure = {
+    tradePress: {
+      product1: getInputNumber('tradePressP1', 0),
+      product2: getInputNumber('tradePressP2', 0),
+      product3: getInputNumber('tradePressP3', 0)
+    },
+    advertisingSupport: {
+      product1: getInputNumber('advertising', 0),
+      product2: getInputNumber('advertisingP2', 0),
+      product3: getInputNumber('advertisingP3', 0)
+    },
+    merchandising: {
+      product1: getInputNumber('merchandisingP1', 0),
+      product2: getInputNumber('merchandisingP2', 0),
+      product3: getInputNumber('merchandisingP3', 0)
+    }
+  };
+
+  const makeAndDeliverProductsTo = {
+    exportArea: {
+      product1: getInputNumber('productionVolume', 0),
+      product2: getInputNumber('exportUnitsP2', 0),
+      product3: getInputNumber('exportUnitsP3', 0)
+    },
+    southArea: {
+      product1: getInputNumber('southUnitsP1', 0),
+      product2: getInputNumber('southUnitsP2', 0),
+      product3: getInputNumber('southUnitsP3', 0)
+    },
+    westArea: {
+      product1: getInputNumber('westUnitsP1', 0),
+      product2: getInputNumber('westUnitsP2', 0),
+      product3: getInputNumber('westUnitsP3', 0)
+    },
+    northArea: {
+      product1: getInputNumber('northUnitsP1', 0),
+      product2: getInputNumber('northUnitsP2', 0),
+      product3: getInputNumber('northUnitsP3', 0)
+    }
+  };
+
+  return {
+    majorProductImprovements: {
+      product1: getInputBool('improveP1'),
+      product2: getInputBool('improveP2'),
+      product3: getInputBool('improveP3')
+    },
+    prices,
+    promotionExpenditure,
+    makeAndDeliverProductsTo,
+    rawMaterial: {
+      unitsToOrder: getInputNumber('rawMaterialUnits', 0),
+      supplierNumber: getInputNumber('supplierNumber', 1),
+      numberOfDeliveries: getInputNumber('deliveryCount', 1)
+    }
+  };
+}
+
 // Build a canonical Topaz-shaped payload so we can persist full parity fields
 // while the UI is still on the simplified form.
 function buildTopaxPayload(decisions) {
   const round = dashboardData?.simulationState?.current_round || 1;
+  const topaxForm = collectTopaxFormData();
 
   return {
     simulationData: {
@@ -56,16 +140,9 @@ function buildTopaxPayload(decisions) {
       status: 2
     },
     decisionData: {
-      majorProductImprovements: { product1: false, product2: false, product3: false },
-      prices: {
-        exportMarket: { product1: numberOr(decisions.price), product2: numberOr(decisions.price), product3: numberOr(decisions.price) },
-        homeMarkets: { product1: numberOr(decisions.price), product2: numberOr(decisions.price), product3: numberOr(decisions.price) }
-      },
-      promotionExpenditure: {
-        tradePress: { product1: 0, product2: 0, product3: 0 },
-        advertisingSupport: { product1: numberOr(decisions.advertising), product2: 0, product3: 0 },
-        merchandising: { product1: 0, product2: 0, product3: 0 }
-      },
+      majorProductImprovements: topaxForm.majorProductImprovements,
+      prices: topaxForm.prices,
+      promotionExpenditure: topaxForm.promotionExpenditure,
       assemblyTimeMinutes: { product1: 0, product2: 0, product3: 0 },
       dividendRatePencePerShare: numberOr(decisions.dividendPayout),
       daysCreditAllowed: 0,
@@ -74,12 +151,7 @@ function buildTopaxPayload(decisions) {
         otherCompanies: false,
         marketShares: numberOr(decisions.marketResearch) > 0
       },
-      makeAndDeliverProductsTo: {
-        exportArea: { product1: numberOr(decisions.productionVolume), product2: 0, product3: 0 },
-        southArea: { product1: 0, product2: 0, product3: 0 },
-        westArea: { product1: 0, product2: 0, product3: 0 },
-        northArea: { product1: 0, product2: 0, product3: 0 }
-      },
+      makeAndDeliverProductsTo: topaxForm.makeAndDeliverProductsTo,
       researchExpenditure: numberOr(decisions.marketResearch),
       salespeopleAllocatedTo: { exportArea: 0, southArea: 0, westArea: 0, northArea: 0 },
       salespeopleRemuneration: {
@@ -102,9 +174,9 @@ function buildTopaxPayload(decisions) {
       },
       salespeoplePipeline: { recruit: 0, dismiss: 0, train: 0 },
       rawMaterial: {
-        unitsToOrder: numberOr(decisions.productionVolume),
-        supplierNumber: 1,
-        numberOfDeliveries: 1
+        unitsToOrder: topaxForm.rawMaterial.unitsToOrder,
+        supplierNumber: topaxForm.rawMaterial.supplierNumber,
+        numberOfDeliveries: topaxForm.rawMaterial.numberOfDeliveries
       }
     }
   };
@@ -262,12 +334,20 @@ async function updateDashboard() {
 // Load decision into form
 function loadDecisionIntoForm(decision) {
   document.getElementById('price').value = decision.price || 100;
+  document.getElementById('priceP2').value = decision.price || 100;
+  document.getElementById('priceP3').value = decision.price || 100;
+  document.getElementById('homePriceP2').value = decision.price || 100;
+  document.getElementById('homePriceP3').value = decision.price || 100;
   document.getElementById('advertising').value = decision.advertising || 0;
+  document.getElementById('advertisingP2').value = 0;
+  document.getElementById('advertisingP3').value = 0;
   document.getElementById('salesForce').value = decision.sales_force || 0;
   document.getElementById('qualityInvestment').value = decision.quality_investment || 0;
   document.getElementById('marketResearch').value = decision.market_research || 0;
   
   document.getElementById('productionVolume').value = decision.production_volume || 0;
+  document.getElementById('exportUnitsP2').value = 0;
+  document.getElementById('exportUnitsP3').value = 0;
   document.getElementById('capacityExpansion').value = decision.capacity_expansion || 0;
   
   document.getElementById('employeesHire').value = decision.employees_hire || 0;
@@ -280,6 +360,7 @@ function loadDecisionIntoForm(decision) {
   document.getElementById('shortTermRepay').value = decision.short_term_repay || 0;
   document.getElementById('longTermRepay').value = decision.long_term_repay || 0;
   document.getElementById('dividendPayout').value = decision.dividend_payout || 0;
+  document.getElementById('rawMaterialUnits').value = decision.production_volume || 0;
 }
 
 // Load entry data from CSV into form
@@ -296,12 +377,21 @@ async function loadEntryDataIntoForm(roundNumber) {
     
     // Populate form with entry values from CSV
     document.getElementById('price').value = entryData.price || 100;
+    document.getElementById('priceP2').value = entryData.price || 100;
+    document.getElementById('priceP3').value = entryData.price || 100;
+    document.getElementById('homePriceP1').value = entryData.price || 100;
+    document.getElementById('homePriceP2').value = entryData.price || 100;
+    document.getElementById('homePriceP3').value = entryData.price || 100;
     document.getElementById('advertising').value = entryData.advertising || 50000;
+    document.getElementById('advertisingP2').value = 0;
+    document.getElementById('advertisingP3').value = 0;
     document.getElementById('salesForce').value = entryData.sales_force || 30000;
     document.getElementById('qualityInvestment').value = entryData.quality_investment || 20000;
     document.getElementById('marketResearch').value = entryData.market_research || 10000;
     
     document.getElementById('productionVolume').value = entryData.production_volume || 8000;
+    document.getElementById('exportUnitsP2').value = 0;
+    document.getElementById('exportUnitsP3').value = 0;
     document.getElementById('capacityExpansion').value = entryData.capacity_expansion || 0;
     
     document.getElementById('employeesHire').value = entryData.employees_hire || 0;
@@ -314,6 +404,7 @@ async function loadEntryDataIntoForm(roundNumber) {
     document.getElementById('shortTermRepay').value = entryData.short_term_repay || 0;
     document.getElementById('longTermRepay').value = entryData.long_term_repay || 0;
     document.getElementById('dividendPayout').value = entryData.dividend_payout || 0;
+    document.getElementById('rawMaterialUnits').value = entryData.production_volume || 8000;
     
     console.log('Loaded entry data from CSV for round', roundNumber);
   } catch (error) {
@@ -352,7 +443,11 @@ function randomizeDecisions() {
   const spendBudget = Math.max(15000, Math.floor(cash * 0.3));
 
   const price = randomStep(70, 170, 1);
+  const priceP2 = Math.max(10, price + randomInt(-10, 10));
+  const priceP3 = Math.max(10, price + randomInt(-10, 10));
   const homePrice = Math.max(10, price + randomInt(-5, 8));
+  const homePriceP2 = Math.max(10, priceP2 + randomInt(-5, 8));
+  const homePriceP3 = Math.max(10, priceP3 + randomInt(-5, 8));
   const productionVolume = randomStep(
     Math.floor(capacity * 0.45 / 100) * 100,
     Math.floor(capacity * 0.75 / 100) * 100,
@@ -360,6 +455,8 @@ function randomizeDecisions() {
   );
 
   const advertising = randomStep(5000, Math.min(50000, Math.floor(spendBudget * 0.35)), 1000);
+  const advertisingP2 = randomStep(1000, Math.min(20000, Math.floor(spendBudget * 0.2)), 1000);
+  const advertisingP3 = randomStep(1000, Math.min(20000, Math.floor(spendBudget * 0.2)), 1000);
   const marketResearch = randomStep(1000, Math.min(15000, Math.floor(spendBudget * 0.12)), 1000);
   const trainingInvestment = randomStep(0, Math.min(8000, Math.floor(spendBudget * 0.08)), 500);
   const dividendPayout = randomStep(0, Math.min(3000, Math.floor(cash * 0.01)), 100);
@@ -387,12 +484,22 @@ function randomizeDecisions() {
   const longTermRepay = longDebt > 0 && cash > 120000 ? randomStep(0, Math.min(10000, longDebt), 1000) : 0;
 
   document.getElementById('price').value = price;
+  document.getElementById('priceP2').value = priceP2;
+  document.getElementById('priceP3').value = priceP3;
   const homePriceField = document.getElementById('homePriceP1');
   if (homePriceField) homePriceField.value = homePrice;
+  const homePriceP2Field = document.getElementById('homePriceP2');
+  const homePriceP3Field = document.getElementById('homePriceP3');
+  if (homePriceP2Field) homePriceP2Field.value = homePriceP2;
+  if (homePriceP3Field) homePriceP3Field.value = homePriceP3;
 
   document.getElementById('advertising').value = advertising;
+  document.getElementById('advertisingP2').value = advertisingP2;
+  document.getElementById('advertisingP3').value = advertisingP3;
   document.getElementById('marketResearch').value = marketResearch;
   document.getElementById('productionVolume').value = productionVolume;
+  document.getElementById('exportUnitsP2').value = Math.floor(productionVolume * 0.2);
+  document.getElementById('exportUnitsP3').value = Math.floor(productionVolume * 0.15);
   document.getElementById('newMachinesToOrder').value = newMachines;
   document.getElementById('employeesHire').value = employeesHire;
   document.getElementById('employeesFire').value = employeesFire;
@@ -406,6 +513,13 @@ function randomizeDecisions() {
   if (southField) southField.value = southUnits;
   if (westField) westField.value = westUnits;
   if (northField) northField.value = northUnits;
+  document.getElementById('southUnitsP2').value = Math.floor(southUnits * 0.25);
+  document.getElementById('southUnitsP3').value = Math.floor(southUnits * 0.2);
+  document.getElementById('westUnitsP2').value = Math.floor(westUnits * 0.25);
+  document.getElementById('westUnitsP3').value = Math.floor(westUnits * 0.2);
+  document.getElementById('northUnitsP2').value = Math.floor(northUnits * 0.25);
+  document.getElementById('northUnitsP3').value = Math.floor(northUnits * 0.2);
+  document.getElementById('rawMaterialUnits').value = Math.floor(productionVolume * 1.5);
 
   // Keep compatibility fields in sync for current simulator validation.
   document.getElementById('salesForce').value = randomStep(5000, 20000, 1000);
@@ -435,14 +549,35 @@ async function submitDecisions(submit) {
     ? numberOr(newMachinesField.value, 0) * 30
     : parseFloat(document.getElementById('capacityExpansion').value);
 
+  const topaxForm = collectTopaxFormData();
+  const productPrices = [
+    topaxForm.prices.exportMarket.product1,
+    topaxForm.prices.exportMarket.product2,
+    topaxForm.prices.exportMarket.product3
+  ];
+  const totalAdvertising =
+    topaxForm.promotionExpenditure.advertisingSupport.product1 +
+    topaxForm.promotionExpenditure.advertisingSupport.product2 +
+    topaxForm.promotionExpenditure.advertisingSupport.product3;
+  const totalDeliveryUnits = Object.values(topaxForm.makeAndDeliverProductsTo)
+    .reduce((areaTotal, areaRow) => areaTotal + Object.values(areaRow).reduce((sum, units) => sum + units, 0), 0);
+  const qualityFromImprovements = Object.values(topaxForm.majorProductImprovements).filter(Boolean).length * 5000;
+  const qualityFromPromotionChannels =
+    topaxForm.promotionExpenditure.tradePress.product1 +
+    topaxForm.promotionExpenditure.tradePress.product2 +
+    topaxForm.promotionExpenditure.tradePress.product3 +
+    topaxForm.promotionExpenditure.merchandising.product1 +
+    topaxForm.promotionExpenditure.merchandising.product2 +
+    topaxForm.promotionExpenditure.merchandising.product3;
+
   const decisions = {
-    price: parseFloat(document.getElementById('price').value),
-    advertising: parseFloat(document.getElementById('advertising').value),
+    price: productPrices.reduce((sum, p) => sum + p, 0) / productPrices.length,
+    advertising: totalAdvertising,
     salesForce: parseFloat(document.getElementById('salesForce').value),
-    qualityInvestment: parseFloat(document.getElementById('qualityInvestment').value),
+    qualityInvestment: Math.max(parseFloat(document.getElementById('qualityInvestment').value), qualityFromImprovements + qualityFromPromotionChannels),
     marketResearch: parseFloat(document.getElementById('marketResearch').value),
     
-    productionVolume: parseFloat(document.getElementById('productionVolume').value),
+    productionVolume: totalDeliveryUnits,
     capacityExpansion: inferredCapacityExpansion,
     
     employeesHire: parseInt(document.getElementById('employeesHire').value),

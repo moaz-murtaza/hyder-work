@@ -357,31 +357,67 @@ table tr:hover {
   margin-bottom: 15px;
 }
 
-/* Topaz-style UI primitives */
-.win-fieldset {
-  border: 2px groove #fff;
-  margin-top: 8px;
-  padding: 8px;
+/* Clean, minimal Topaz form layout */
+.topaz-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.win-legend {
-  padding: 0 4px;
+.topaz-section {
+  display: grid;
+  gap: 16px;
+}
+
+.topaz-meta-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.topaz-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.topaz-card h3 {
+  font-size: 15px;
   font-weight: 700;
+  color: #334155;
+  margin-bottom: 12px;
 }
 
-.win-input {
-  height: 28px !important;
-  border: 2px solid #fff !important;
-  border-color: gray #fff #fff gray !important;
-  border-radius: 0 !important;
-  padding: 2px 6px !important;
-  background: #fff !important;
-  color: #111 !important;
+.topaz-grid {
+  display: grid;
+  gap: 10px;
 }
 
-.win-input:focus {
-  outline: none !important;
-  box-shadow: none !important;
+.topaz-grid-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.topaz-grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.topaz-grid-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.topaz-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #fff;
+  color: #111827;
+}
+
+.topaz-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
 }
 
 .action-buttons {
@@ -451,10 +487,6 @@ table tr:hover {
     grid-template-columns: 1fr;
   }
   
-  .decision-form {
-    grid-template-columns: 1fr;
-  }
-  
   .financial-statements {
     grid-template-columns: 1fr;
   }
@@ -466,5 +498,20 @@ table tr:hover {
   
   .action-buttons {
     flex-direction: column;
+  }
+
+  .action-buttons .btn {
+    width: 100%;
+  }
+
+  .topaz-meta-grid,
+  .topaz-grid-2,
+  .topaz-grid-3,
+  .topaz-grid-4 {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    padding: 16px;
   }
 }

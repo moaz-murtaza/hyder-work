@@ -59,102 +59,123 @@
         <div id="errorMessage" class="error-message"></div>
         
         <form id="decisionsForm" style="display: none;">
-          <div class="form-section">
-            <h3>Topaz Decision Entry</h3>
-
-            <div style="display: flex; gap: 12px; margin-bottom: 12px; align-items: stretch; flex-wrap: wrap;">
-              <fieldset class="win-fieldset" style="background:#00ffff; flex:2; min-width:360px;">
-                <legend class="win-legend">Simulation Data</legend>
-                <div style="display:flex; justify-content:space-between; gap:10px; align-items:center;">
-                  <label>Simulation Code <input class="win-input" style="width:90px;" type="text" value="Bhutto"></label>
-                  <label>Year <input class="win-input" style="width:60px;" type="text" value="1"></label>
-                  <label>Quarter <input class="win-input" style="width:60px;" type="text" value="1"></label>
-                </div>
-              </fieldset>
-
-              <fieldset class="win-fieldset" style="background:#ffdead; flex:2; min-width:360px;">
-                <legend class="win-legend">Company Information</legend>
-                <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 8px; text-align:center;">
-                  <div><div>Group</div><input class="win-input" type="text" value="1"></div>
-                  <div><div>Company</div><input class="win-input" type="text" value="1"></div>
-                  <div><div>Identity</div><input class="win-input" type="text" value="0"></div>
-                  <div><div>Status</div><input class="win-input" type="text" value="2"></div>
-                </div>
-              </fieldset>
-            </div>
-
-            <fieldset class="win-fieldset" style="background:#e0e0e0;">
-              <legend class="win-legend">Decision Data</legend>
-              <div style="display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap;">
-                <div style="flex:1; min-width:420px;">
-                  <div style="font-weight:700; margin-bottom:8px;">Prices (Product 1)</div>
+          <div class="topaz-form">
+            <div class="topaz-section topaz-meta-grid">
+              <div class="topaz-card">
+                <h3>Simulation Data</h3>
+                <div class="topaz-grid topaz-grid-3">
                   <div class="form-group">
-                    <label>Export Market</label>
-                    <input class="win-input" type="number" id="price" value="100" min="10" max="500" step="0.01" required>
+                    <label>Simulation Code</label>
+                    <input class="topaz-input" type="text" value="Bhutto">
                   </div>
                   <div class="form-group">
-                    <label>Home Market</label>
-                    <input class="win-input" type="number" id="homePriceP1" value="100" min="10" max="500" step="0.01">
-                  </div>
-
-                  <div style="font-weight:700; margin:12px 0 8px;">Promotion Expenditure (Product 1)</div>
-                  <div class="form-group">
-                    <label>Advertising Support</label>
-                    <input class="win-input" type="number" id="advertising" value="50000" min="0" step="1000" required>
+                    <label>Year</label>
+                    <input class="topaz-input" type="text" value="1">
                   </div>
                   <div class="form-group">
-                    <label>Trade Press</label>
-                    <input class="win-input" type="number" id="tradePressP1" value="0" min="0" step="1">
-                  </div>
-                  <div class="form-group">
-                    <label>Merchandising</label>
-                    <input class="win-input" type="number" id="merchandisingP1" value="0" min="0" step="1">
-                  </div>
-
-                  <div style="font-weight:700; margin:12px 0 8px;">Make and Deliver (Product 1)</div>
-                  <div class="form-group">
-                    <label>Export Area Units</label>
-                    <input class="win-input" type="number" id="productionVolume" value="8000" min="0" step="100" required>
-                    <small class="text-muted">Current capacity: <span id="capacityInfo">-</span> units</small>
-                  </div>
-                  <div class="form-group"><label>South Area Units</label><input class="win-input" type="number" id="southUnitsP1" value="0" min="0" step="1"></div>
-                  <div class="form-group"><label>West Area Units</label><input class="win-input" type="number" id="westUnitsP1" value="0" min="0" step="1"></div>
-                  <div class="form-group"><label>North Area Units</label><input class="win-input" type="number" id="northUnitsP1" value="0" min="0" step="1"></div>
-                </div>
-
-                <div style="flex:1; min-width:420px;">
-                  <div class="form-group">
-                    <label>Dividend Rate (pence/share)</label>
-                    <input class="win-input" type="number" id="dividendPayout" value="0" min="0" step="1" required>
-                  </div>
-                  <div class="form-group">
-                    <label>Research Expenditure (£'000)</label>
-                    <input class="win-input" type="number" id="marketResearch" value="10000" min="0" step="1000" required>
-                  </div>
-                  <div class="form-group">
-                    <label>New Machines to Order</label>
-                    <input class="win-input" type="number" id="newMachinesToOrder" value="0" min="0" step="1">
-                  </div>
-                  <div class="form-group">
-                    <label>Assembly Workers Recruit</label>
-                    <input class="win-input" type="number" id="employeesHire" value="0" min="0" step="1" required>
-                  </div>
-                  <div class="form-group">
-                    <label>Assembly Workers Dismiss</label>
-                    <input class="win-input" type="number" id="employeesFire" value="0" min="0" step="1" required>
-                    <small class="text-muted">Current: <span id="employeesInfo">-</span> employees</small>
-                  </div>
-                  <div class="form-group">
-                    <label>Assembly Workers Train</label>
-                    <input class="win-input" type="number" id="trainingInvestment" value="0" min="0" step="1" required>
-                  </div>
-                  <div class="form-group">
-                    <label>Assembly Worker Hourly Wage (Pence)</label>
-                    <input class="win-input" type="number" id="wageLevel" value="2500" min="1500" max="10000" step="1" required>
+                    <label>Quarter</label>
+                    <input class="topaz-input" type="text" value="1">
                   </div>
                 </div>
               </div>
-            </fieldset>
+
+              <div class="topaz-card">
+                <h3>Company Information</h3>
+                <div class="topaz-grid topaz-grid-4">
+                  <div class="form-group"><label>Group</label><input class="topaz-input" type="text" value="1"></div>
+                  <div class="form-group"><label>Company</label><input class="topaz-input" type="text" value="1"></div>
+                  <div class="form-group"><label>Identity</label><input class="topaz-input" type="text" value="0"></div>
+                  <div class="form-group"><label>Status</label><input class="topaz-input" type="text" value="2"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="topaz-section topaz-grid topaz-grid-2">
+              <div class="topaz-card">
+                <h3>Pricing and Market</h3>
+                <div class="topaz-grid topaz-grid-3">
+                  <div class="form-group"><label>Export Price P1</label><input class="topaz-input" type="number" id="price" value="100" min="10" max="500" step="0.01" required></div>
+                  <div class="form-group"><label>Export Price P2</label><input class="topaz-input" type="number" id="priceP2" value="100" min="10" max="500" step="0.01"></div>
+                  <div class="form-group"><label>Export Price P3</label><input class="topaz-input" type="number" id="priceP3" value="100" min="10" max="500" step="0.01"></div>
+                </div>
+                <div class="topaz-grid topaz-grid-3">
+                  <div class="form-group"><label>Home Price P1</label><input class="topaz-input" type="number" id="homePriceP1" value="100" min="10" max="500" step="0.01"></div>
+                  <div class="form-group"><label>Home Price P2</label><input class="topaz-input" type="number" id="homePriceP2" value="100" min="10" max="500" step="0.01"></div>
+                  <div class="form-group"><label>Home Price P3</label><input class="topaz-input" type="number" id="homePriceP3" value="100" min="10" max="500" step="0.01"></div>
+                </div>
+                <div class="topaz-grid topaz-grid-3">
+                  <label><input type="checkbox" id="improveP1"> Improve P1</label>
+                  <label><input type="checkbox" id="improveP2"> Improve P2</label>
+                  <label><input type="checkbox" id="improveP3"> Improve P3</label>
+                </div>
+                <div class="topaz-grid topaz-grid-3">
+                  <div class="form-group"><label>Ad Support P1</label><input class="topaz-input" type="number" id="advertising" value="50000" min="0" step="1000" required></div>
+                  <div class="form-group"><label>Ad Support P2</label><input class="topaz-input" type="number" id="advertisingP2" value="0" min="0" step="1000"></div>
+                  <div class="form-group"><label>Ad Support P3</label><input class="topaz-input" type="number" id="advertisingP3" value="0" min="0" step="1000"></div>
+                </div>
+                <div class="topaz-grid topaz-grid-3">
+                  <div class="form-group"><label>Trade Press P1</label><input class="topaz-input" type="number" id="tradePressP1" value="0" min="0" step="1"></div>
+                  <div class="form-group"><label>Trade Press P2</label><input class="topaz-input" type="number" id="tradePressP2" value="0" min="0" step="1"></div>
+                  <div class="form-group"><label>Trade Press P3</label><input class="topaz-input" type="number" id="tradePressP3" value="0" min="0" step="1"></div>
+                </div>
+                <div class="topaz-grid topaz-grid-3">
+                  <div class="form-group"><label>Merchandising P1</label><input class="topaz-input" type="number" id="merchandisingP1" value="0" min="0" step="1"></div>
+                  <div class="form-group"><label>Merchandising P2</label><input class="topaz-input" type="number" id="merchandisingP2" value="0" min="0" step="1"></div>
+                  <div class="form-group"><label>Merchandising P3</label><input class="topaz-input" type="number" id="merchandisingP3" value="0" min="0" step="1"></div>
+                </div>
+                <div class="form-group">
+                  <label>Research Expenditure</label>
+                  <input class="topaz-input" type="number" id="marketResearch" value="10000" min="0" step="1000" required>
+                </div>
+              </div>
+
+              <div class="topaz-card">
+                <h3>Operations and Workforce</h3>
+                <small class="text-muted">Current capacity: <span id="capacityInfo">-</span> units</small>
+                <div class="topaz-grid topaz-grid-3">
+                  <div class="form-group"><label>Export Units P1</label><input class="topaz-input" type="number" id="productionVolume" value="8000" min="0" step="100" required></div>
+                  <div class="form-group"><label>Export Units P2</label><input class="topaz-input" type="number" id="exportUnitsP2" value="0" min="0" step="1"></div>
+                  <div class="form-group"><label>Export Units P3</label><input class="topaz-input" type="number" id="exportUnitsP3" value="0" min="0" step="1"></div>
+                </div>
+                <div class="topaz-grid topaz-grid-3">
+                  <div class="form-group"><label>South Units P1</label><input class="topaz-input" type="number" id="southUnitsP1" value="0" min="0" step="1"></div>
+                  <div class="form-group"><label>South Units P2</label><input class="topaz-input" type="number" id="southUnitsP2" value="0" min="0" step="1"></div>
+                  <div class="form-group"><label>South Units P3</label><input class="topaz-input" type="number" id="southUnitsP3" value="0" min="0" step="1"></div>
+                </div>
+                <div class="topaz-grid topaz-grid-3">
+                  <div class="form-group"><label>West Units P1</label><input class="topaz-input" type="number" id="westUnitsP1" value="0" min="0" step="1"></div>
+                  <div class="form-group"><label>West Units P2</label><input class="topaz-input" type="number" id="westUnitsP2" value="0" min="0" step="1"></div>
+                  <div class="form-group"><label>West Units P3</label><input class="topaz-input" type="number" id="westUnitsP3" value="0" min="0" step="1"></div>
+                </div>
+                <div class="topaz-grid topaz-grid-3">
+                  <div class="form-group"><label>North Units P1</label><input class="topaz-input" type="number" id="northUnitsP1" value="0" min="0" step="1"></div>
+                  <div class="form-group"><label>North Units P2</label><input class="topaz-input" type="number" id="northUnitsP2" value="0" min="0" step="1"></div>
+                  <div class="form-group"><label>North Units P3</label><input class="topaz-input" type="number" id="northUnitsP3" value="0" min="0" step="1"></div>
+                </div>
+                <div class="form-group">
+                  <label>New Machines to Order</label>
+                  <input class="topaz-input" type="number" id="newMachinesToOrder" value="0" min="0" step="1">
+                </div>
+                <div class="topaz-grid topaz-grid-3">
+                  <div class="form-group"><label>Raw Material Units</label><input class="topaz-input" type="number" id="rawMaterialUnits" value="0" min="0" step="1"></div>
+                  <div class="form-group"><label>Supplier No.</label><input class="topaz-input" type="number" id="supplierNumber" value="1" min="1" step="1"></div>
+                  <div class="form-group"><label>No. of Deliveries</label><input class="topaz-input" type="number" id="deliveryCount" value="1" min="1" step="1"></div>
+                </div>
+                <div class="topaz-grid topaz-grid-2">
+                  <div class="form-group"><label>Workers Recruit</label><input class="topaz-input" type="number" id="employeesHire" value="0" min="0" step="1" required></div>
+                  <div class="form-group"><label>Workers Dismiss</label><input class="topaz-input" type="number" id="employeesFire" value="0" min="0" step="1" required></div>
+                </div>
+                <small class="text-muted">Current employees: <span id="employeesInfo">-</span></small>
+                <div class="topaz-grid topaz-grid-2">
+                  <div class="form-group"><label>Workers Train</label><input class="topaz-input" type="number" id="trainingInvestment" value="0" min="0" step="1" required></div>
+                  <div class="form-group"><label>Hourly Wage (Pence)</label><input class="topaz-input" type="number" id="wageLevel" value="2500" min="1500" max="10000" step="1" required></div>
+                </div>
+                <div class="form-group">
+                  <label>Dividend Rate (pence/share)</label>
+                  <input class="topaz-input" type="number" id="dividendPayout" value="0" min="0" step="1" required>
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- Compatibility fields retained for current simulator -->
