@@ -29,6 +29,15 @@ function intOr(value, fallback = 0) {
   return Number.isFinite(num) ? num : fallback;
 }
 
+function randomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function randomStep(min, max, step) {
+  const count = Math.max(0, Math.floor((max - min) / step));
+  return min + randomInt(0, count) * step;
+}
+
 // Build a canonical Topaz-shaped payload so we can persist full parity fields
 // while the UI is still on the simplified form.
 function buildTopaxPayload(decisions) {
@@ -327,6 +336,92 @@ async function saveDraft() {
   await submitDecisions(false);
 }
 
+function randomizeDecisions() {
+  if (!dashboardData || !dashboardData.team) {
+    return;
+  }
+
+  const team = dashboardData.team;
+  const capacity = Math.max(100, numberOr(team.production_capacity, 8000));
+  const employees = Math.max(1, intOr(team.employees, 50));
+  const cash = Math.max(0, numberOr(team.cash, 100000));
+  const shortDebt = Math.max(0, numberOr(team.short_term_debt, 0));
+  const longDebt = Math.max(0, numberOr(team.long_term_debt, 0));
+
+  // Keep total cash commitments conservative to reduce bankruptcy risk.
+  const spendBudget = Math.max(15000, Math.floor(cash * 0.3));
+
+  const price = randomStep(70, 170, 1);
+  const homePrice = Math.max(10, price + randomInt(-5, 8));
+  const productionVolume = randomStep(
+    Math.floor(capacity * 0.45 / 100) * 100,
+    Math.floor(capacity * 0.75 / 100) * 100,
+    100
+  );
+
+  const advertising = randomStep(5000, Math.min(50000, Math.floor(spendBudget * 0.35)), 1000);
+  const marketResearch = randomStep(1000, Math.min(15000, Math.floor(spendBudget * 0.12)), 1000);
+  const trainingInvestment = randomStep(0, Math.min(8000, Math.floor(spendBudget * 0.08)), 500);
+  const dividendPayout = randomStep(0, Math.min(3000, Math.floor(cash * 0.01)), 100);
+
+  const maxMachines = cash > 120000 ? 2 : 1;
+  const newMachines = randomInt(0, maxMachines);
+
+  const maxHire = Math.max(0, Math.floor(employees * 0.1));
+  const maxFire = Math.max(0, Math.floor((employees - 1) * 0.08));
+  const employeesHire = randomInt(0, Math.min(8, maxHire));
+  const employeesFire = randomInt(0, Math.min(5, maxFire));
+  const wageLevel = randomStep(2200, 3200, 50);
+
+  const exportUnits = randomInt(Math.floor(productionVolume * 0.2), Math.floor(productionVolume * 0.4));
+  let remainingUnits = Math.max(0, productionVolume - exportUnits);
+  const southUnits = Math.floor(remainingUnits * 0.45);
+  remainingUnits -= southUnits;
+  const westUnits = Math.floor(remainingUnits * 0.55);
+  const northUnits = Math.max(0, remainingUnits - westUnits);
+
+  // Default to no extra borrowing; allow a small buffer only when cash is low.
+  const shortTermBorrow = cash < 25000 ? randomStep(0, 20000, 1000) : 0;
+  const longTermBorrow = 0;
+  const shortTermRepay = shortDebt > 0 && cash > 80000 ? randomStep(0, Math.min(10000, shortDebt), 1000) : 0;
+  const longTermRepay = longDebt > 0 && cash > 120000 ? randomStep(0, Math.min(10000, longDebt), 1000) : 0;
+
+  document.getElementById('price').value = price;
+  const homePriceField = document.getElementById('homePriceP1');
+  if (homePriceField) homePriceField.value = homePrice;
+
+  document.getElementById('advertising').value = advertising;
+  document.getElementById('marketResearch').value = marketResearch;
+  document.getElementById('productionVolume').value = productionVolume;
+  document.getElementById('newMachinesToOrder').value = newMachines;
+  document.getElementById('employeesHire').value = employeesHire;
+  document.getElementById('employeesFire').value = employeesFire;
+  document.getElementById('trainingInvestment').value = trainingInvestment;
+  document.getElementById('wageLevel').value = wageLevel;
+  document.getElementById('dividendPayout').value = dividendPayout;
+
+  const southField = document.getElementById('southUnitsP1');
+  const westField = document.getElementById('westUnitsP1');
+  const northField = document.getElementById('northUnitsP1');
+  if (southField) southField.value = southUnits;
+  if (westField) westField.value = westUnits;
+  if (northField) northField.value = northUnits;
+
+  // Keep compatibility fields in sync for current simulator validation.
+  document.getElementById('salesForce').value = randomStep(5000, 20000, 1000);
+  document.getElementById('qualityInvestment').value = randomStep(2000, 12000, 1000);
+  document.getElementById('capacityExpansion').value = newMachines * 30;
+  document.getElementById('shortTermBorrow').value = shortTermBorrow;
+  document.getElementById('longTermBorrow').value = longTermBorrow;
+  document.getElementById('shortTermRepay').value = shortTermRepay;
+  document.getElementById('longTermRepay').value = longTermRepay;
+
+  const successEl = document.getElementById('successMessage');
+  const errorEl = document.getElementById('errorMessage');
+  errorEl.textContent = '';
+  successEl.textContent = 'Safe random decisions generated. Review and submit when ready.';
+}
+
 // Submit decisions
 async function submitDecisions(submit) {
   const errorEl = document.getElementById('errorMessage');
@@ -335,6 +430,11 @@ async function submitDecisions(submit) {
   errorEl.textContent = '';
   successEl.textContent = '';
   
+  const newMachinesField = document.getElementById('newMachinesToOrder');
+  const inferredCapacityExpansion = newMachinesField
+    ? numberOr(newMachinesField.value, 0) * 30
+    : parseFloat(document.getElementById('capacityExpansion').value);
+
   const decisions = {
     price: parseFloat(document.getElementById('price').value),
     advertising: parseFloat(document.getElementById('advertising').value),
@@ -343,7 +443,7 @@ async function submitDecisions(submit) {
     marketResearch: parseFloat(document.getElementById('marketResearch').value),
     
     productionVolume: parseFloat(document.getElementById('productionVolume').value),
-    capacityExpansion: parseFloat(document.getElementById('capacityExpansion').value),
+    capacityExpansion: inferredCapacityExpansion,
     
     employeesHire: parseInt(document.getElementById('employeesHire').value),
     employeesFire: parseInt(document.getElementById('employeesFire').value),

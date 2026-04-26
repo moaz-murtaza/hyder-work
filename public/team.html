@@ -59,100 +59,119 @@
         <div id="errorMessage" class="error-message"></div>
         
         <form id="decisionsForm" style="display: none;">
-          <div class="decision-form">
-            <!-- Marketing Decisions -->
-            <div class="form-section">
-              <h3>📈 Marketing</h3>
-              <div class="form-group">
-                <label>Product Price ($)</label>
-                <input type="number" id="price" min="10" max="500" step="0.01" value="100" required>
-              </div>
-              <div class="form-group">
-                <label>Advertising Expenditure ($)</label>
-                <input type="number" id="advertising" min="0" step="1000" value="50000" required>
-              </div>
-              <div class="form-group">
-                <label>Sales Force Expenditure ($)</label>
-                <input type="number" id="salesForce" min="0" step="1000" value="30000" required>
-              </div>
-              <div class="form-group">
-                <label>Quality Investment ($)</label>
-                <input type="number" id="qualityInvestment" min="0" step="1000" value="20000" required>
-              </div>
-              <div class="form-group">
-                <label>Market Research ($)</label>
-                <input type="number" id="marketResearch" min="0" step="1000" value="10000" required>
-              </div>
+          <div class="form-section">
+            <h3>Topaz Decision Entry</h3>
+
+            <div style="display: flex; gap: 12px; margin-bottom: 12px; align-items: stretch; flex-wrap: wrap;">
+              <fieldset class="win-fieldset" style="background:#00ffff; flex:2; min-width:360px;">
+                <legend class="win-legend">Simulation Data</legend>
+                <div style="display:flex; justify-content:space-between; gap:10px; align-items:center;">
+                  <label>Simulation Code <input class="win-input" style="width:90px;" type="text" value="Bhutto"></label>
+                  <label>Year <input class="win-input" style="width:60px;" type="text" value="1"></label>
+                  <label>Quarter <input class="win-input" style="width:60px;" type="text" value="1"></label>
+                </div>
+              </fieldset>
+
+              <fieldset class="win-fieldset" style="background:#ffdead; flex:2; min-width:360px;">
+                <legend class="win-legend">Company Information</legend>
+                <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 8px; text-align:center;">
+                  <div><div>Group</div><input class="win-input" type="text" value="1"></div>
+                  <div><div>Company</div><input class="win-input" type="text" value="1"></div>
+                  <div><div>Identity</div><input class="win-input" type="text" value="0"></div>
+                  <div><div>Status</div><input class="win-input" type="text" value="2"></div>
+                </div>
+              </fieldset>
             </div>
 
-            <!-- Production Decisions -->
-            <div class="form-section">
-              <h3>🏭 Production</h3>
-              <div class="form-group">
-                <label>Production Volume (units)</label>
-                <input type="number" id="productionVolume" min="0" step="100" value="8000" required>
-                <small class="text-muted">Current capacity: <span id="capacityInfo">-</span> units</small>
-              </div>
-              <div class="form-group">
-                <label>Capacity Expansion ($)</label>
-                <input type="number" id="capacityExpansion" min="0" step="10000" value="0" required>
-                <small class="text-muted">$30 per unit of new capacity</small>
-              </div>
-            </div>
+            <fieldset class="win-fieldset" style="background:#e0e0e0;">
+              <legend class="win-legend">Decision Data</legend>
+              <div style="display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap;">
+                <div style="flex:1; min-width:420px;">
+                  <div style="font-weight:700; margin-bottom:8px;">Prices (Product 1)</div>
+                  <div class="form-group">
+                    <label>Export Market</label>
+                    <input class="win-input" type="number" id="price" value="100" min="10" max="500" step="0.01" required>
+                  </div>
+                  <div class="form-group">
+                    <label>Home Market</label>
+                    <input class="win-input" type="number" id="homePriceP1" value="100" min="10" max="500" step="0.01">
+                  </div>
 
-            <!-- HR Decisions -->
-            <div class="form-section">
-              <h3>👥 Human Resources</h3>
-              <div class="form-group">
-                <label>Hire Employees</label>
-                <input type="number" id="employeesHire" min="0" step="1" value="0" required>
-              </div>
-              <div class="form-group">
-                <label>Fire Employees</label>
-                <input type="number" id="employeesFire" min="0" step="1" value="0" required>
-                <small class="text-muted">Current: <span id="employeesInfo">-</span> employees</small>
-              </div>
-              <div class="form-group">
-                <label>Monthly Wage Level ($)</label>
-                <input type="number" id="wageLevel" min="1500" max="10000" step="100" value="2500" required>
-              </div>
-              <div class="form-group">
-                <label>Training Investment ($)</label>
-                <input type="number" id="trainingInvestment" min="0" step="1000" value="5000" required>
-              </div>
-            </div>
+                  <div style="font-weight:700; margin:12px 0 8px;">Promotion Expenditure (Product 1)</div>
+                  <div class="form-group">
+                    <label>Advertising Support</label>
+                    <input class="win-input" type="number" id="advertising" value="50000" min="0" step="1000" required>
+                  </div>
+                  <div class="form-group">
+                    <label>Trade Press</label>
+                    <input class="win-input" type="number" id="tradePressP1" value="0" min="0" step="1">
+                  </div>
+                  <div class="form-group">
+                    <label>Merchandising</label>
+                    <input class="win-input" type="number" id="merchandisingP1" value="0" min="0" step="1">
+                  </div>
 
-            <!-- Finance Decisions -->
-            <div class="form-section">
-              <h3>💰 Finance</h3>
-              <div class="form-group">
-                <label>Short-Term Borrowing ($)</label>
-                <input type="number" id="shortTermBorrow" min="0" step="10000" value="0" required>
-                <small class="text-muted">Interest: 8% annual</small>
+                  <div style="font-weight:700; margin:12px 0 8px;">Make and Deliver (Product 1)</div>
+                  <div class="form-group">
+                    <label>Export Area Units</label>
+                    <input class="win-input" type="number" id="productionVolume" value="8000" min="0" step="100" required>
+                    <small class="text-muted">Current capacity: <span id="capacityInfo">-</span> units</small>
+                  </div>
+                  <div class="form-group"><label>South Area Units</label><input class="win-input" type="number" id="southUnitsP1" value="0" min="0" step="1"></div>
+                  <div class="form-group"><label>West Area Units</label><input class="win-input" type="number" id="westUnitsP1" value="0" min="0" step="1"></div>
+                  <div class="form-group"><label>North Area Units</label><input class="win-input" type="number" id="northUnitsP1" value="0" min="0" step="1"></div>
+                </div>
+
+                <div style="flex:1; min-width:420px;">
+                  <div class="form-group">
+                    <label>Dividend Rate (pence/share)</label>
+                    <input class="win-input" type="number" id="dividendPayout" value="0" min="0" step="1" required>
+                  </div>
+                  <div class="form-group">
+                    <label>Research Expenditure (£'000)</label>
+                    <input class="win-input" type="number" id="marketResearch" value="10000" min="0" step="1000" required>
+                  </div>
+                  <div class="form-group">
+                    <label>New Machines to Order</label>
+                    <input class="win-input" type="number" id="newMachinesToOrder" value="0" min="0" step="1">
+                  </div>
+                  <div class="form-group">
+                    <label>Assembly Workers Recruit</label>
+                    <input class="win-input" type="number" id="employeesHire" value="0" min="0" step="1" required>
+                  </div>
+                  <div class="form-group">
+                    <label>Assembly Workers Dismiss</label>
+                    <input class="win-input" type="number" id="employeesFire" value="0" min="0" step="1" required>
+                    <small class="text-muted">Current: <span id="employeesInfo">-</span> employees</small>
+                  </div>
+                  <div class="form-group">
+                    <label>Assembly Workers Train</label>
+                    <input class="win-input" type="number" id="trainingInvestment" value="0" min="0" step="1" required>
+                  </div>
+                  <div class="form-group">
+                    <label>Assembly Worker Hourly Wage (Pence)</label>
+                    <input class="win-input" type="number" id="wageLevel" value="2500" min="1500" max="10000" step="1" required>
+                  </div>
+                </div>
               </div>
-              <div class="form-group">
-                <label>Long-Term Borrowing ($)</label>
-                <input type="number" id="longTermBorrow" min="0" step="10000" value="0" required>
-                <small class="text-muted">Interest: 6% annual</small>
-              </div>
-              <div class="form-group">
-                <label>Short-Term Repayment ($)</label>
-                <input type="number" id="shortTermRepay" min="0" step="10000" value="0" required>
-                <small class="text-muted">Current: $<span id="stDebtInfo">-</span></small>
-              </div>
-              <div class="form-group">
-                <label>Long-Term Repayment ($)</label>
-                <input type="number" id="longTermRepay" min="0" step="10000" value="0" required>
-                <small class="text-muted">Current: $<span id="ltDebtInfo">-</span></small>
-              </div>
-              <div class="form-group">
-                <label>Dividend Payout ($)</label>
-                <input type="number" id="dividendPayout" min="0" step="1000" value="0" required>
-              </div>
-            </div>
+            </fieldset>
+          </div>
+
+          <!-- Compatibility fields retained for current simulator -->
+          <div style="display:none;">
+            <input type="number" id="salesForce" value="0">
+            <input type="number" id="qualityInvestment" value="0">
+            <input type="number" id="capacityExpansion" value="0">
+            <input type="number" id="shortTermBorrow" value="0">
+            <input type="number" id="longTermBorrow" value="0">
+            <input type="number" id="shortTermRepay" value="0">
+            <input type="number" id="longTermRepay" value="0">
+            <span id="stDebtInfo">0</span>
+            <span id="ltDebtInfo">0</span>
           </div>
 
           <div class="action-buttons">
+            <button type="button" class="btn btn-warning" onclick="randomizeDecisions()">Randomize (Safe)</button>
             <button type="button" class="btn btn-secondary" onclick="saveDraft()">Save Draft</button>
             <button type="submit" class="btn btn-success">Submit Decisions</button>
           </div>

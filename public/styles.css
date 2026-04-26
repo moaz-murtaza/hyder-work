@@ -357,6 +357,33 @@ table tr:hover {
   margin-bottom: 15px;
 }
 
+/* Topaz-style UI primitives */
+.win-fieldset {
+  border: 2px groove #fff;
+  margin-top: 8px;
+  padding: 8px;
+}
+
+.win-legend {
+  padding: 0 4px;
+  font-weight: 700;
+}
+
+.win-input {
+  height: 28px !important;
+  border: 2px solid #fff !important;
+  border-color: gray #fff #fff gray !important;
+  border-radius: 0 !important;
+  padding: 2px 6px !important;
+  background: #fff !important;
+  color: #111 !important;
+}
+
+.win-input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 .action-buttons {
   display: flex;
   gap: 10px;
