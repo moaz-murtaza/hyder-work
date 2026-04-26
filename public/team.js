@@ -19,6 +19,88 @@ window.fetch = (url, options = {}) => {
   return originalFetch(url, { ...options, headers });
 };
 
+function numberOr(value, fallback = 0) {
+  const num = Number(value);
+  return Number.isFinite(num) ? num : fallback;
+}
+
+function intOr(value, fallback = 0) {
+  const num = Number.parseInt(value, 10);
+  return Number.isFinite(num) ? num : fallback;
+}
+
+// Build a canonical Topaz-shaped payload so we can persist full parity fields
+// while the UI is still on the simplified form.
+function buildTopaxPayload(decisions) {
+  const round = dashboardData?.simulationState?.current_round || 1;
+
+  return {
+    simulationData: {
+      simulationCode: 'Bhutto',
+      year: Math.floor((round - 1) / 4) + 1,
+      quarter: ((round - 1) % 4) + 1
+    },
+    companyInformation: {
+      groupNumber: 1,
+      companyNumber: intOr(teamNumber, 1),
+      identityNumber: 0,
+      status: 2
+    },
+    decisionData: {
+      majorProductImprovements: { product1: false, product2: false, product3: false },
+      prices: {
+        exportMarket: { product1: numberOr(decisions.price), product2: numberOr(decisions.price), product3: numberOr(decisions.price) },
+        homeMarkets: { product1: numberOr(decisions.price), product2: numberOr(decisions.price), product3: numberOr(decisions.price) }
+      },
+      promotionExpenditure: {
+        tradePress: { product1: 0, product2: 0, product3: 0 },
+        advertisingSupport: { product1: numberOr(decisions.advertising), product2: 0, product3: 0 },
+        merchandising: { product1: 0, product2: 0, product3: 0 }
+      },
+      assemblyTimeMinutes: { product1: 0, product2: 0, product3: 0 },
+      dividendRatePencePerShare: numberOr(decisions.dividendPayout),
+      daysCreditAllowed: 0,
+      vans: { buy: 0, sell: 0 },
+      informationWanted: {
+        otherCompanies: false,
+        marketShares: numberOr(decisions.marketResearch) > 0
+      },
+      makeAndDeliverProductsTo: {
+        exportArea: { product1: numberOr(decisions.productionVolume), product2: 0, product3: 0 },
+        southArea: { product1: 0, product2: 0, product3: 0 },
+        westArea: { product1: 0, product2: 0, product3: 0 },
+        northArea: { product1: 0, product2: 0, product3: 0 }
+      },
+      researchExpenditure: numberOr(decisions.marketResearch),
+      salespeopleAllocatedTo: { exportArea: 0, southArea: 0, westArea: 0, northArea: 0 },
+      salespeopleRemuneration: {
+        quarterlySalaryHundreds: 0,
+        salesCommissionPercent: 0
+      },
+      assemblyWorkers: {
+        hourlyWagePounds: Math.floor(numberOr(decisions.wageLevel) / 100),
+        hourlyWagePence: Math.round(numberOr(decisions.wageLevel) % 100),
+        shiftLevel: 1,
+        recruit: intOr(decisions.employeesHire),
+        dismiss: intOr(decisions.employeesFire),
+        train: numberOr(decisions.trainingInvestment)
+      },
+      quarterlyManagementBudget: 0,
+      contractMaintenanceHours: 0,
+      machines: {
+        toSell: 0,
+        newToOrder: Math.floor(numberOr(decisions.capacityExpansion) / 30)
+      },
+      salespeoplePipeline: { recruit: 0, dismiss: 0, train: 0 },
+      rawMaterial: {
+        unitsToOrder: numberOr(decisions.productionVolume),
+        supplierNumber: 1,
+        numberOfDeliveries: 1
+      }
+    }
+  };
+}
+
 // Initialize dashboard
 async function init() {
   await checkAuth();
@@ -276,6 +358,10 @@ async function submitDecisions(submit) {
     
     submit: submit
   };
+
+  // Include canonical Topaz payload so backend stores full parity-shape data.
+  decisions.topaxPayload = buildTopaxPayload(decisions);
+  decisions.topaxPayloadVersion = 1;
   
   try {
     const response = await fetch('/api/team/submit-decisions', {
