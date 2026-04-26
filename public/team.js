@@ -121,6 +121,52 @@ function collectTopaxFormData() {
   };
 }
 
+function getDeliveryCellsFromForm() {
+  return [
+    'productionVolume', 'exportUnitsP2', 'exportUnitsP3',
+    'southUnitsP1', 'southUnitsP2', 'southUnitsP3',
+    'westUnitsP1', 'westUnitsP2', 'westUnitsP3',
+    'northUnitsP1', 'northUnitsP2', 'northUnitsP3'
+  ];
+}
+
+function clampDeliveryPlanToLimit(limit) {
+  const safeLimit = Math.max(0, Math.floor(limit));
+  const ids = getDeliveryCellsFromForm();
+  const values = ids.map((id) => Math.max(0, Math.floor(getInputNumber(id, 0))));
+  const total = values.reduce((sum, v) => sum + v, 0);
+
+  if (total <= safeLimit || total === 0) {
+    return;
+  }
+
+  const scale = safeLimit / total;
+  let scaledValues = values.map((v) => Math.floor(v * scale));
+  let scaledTotal = scaledValues.reduce((sum, v) => sum + v, 0);
+
+  // Distribute remainder to larger original buckets first.
+  if (scaledTotal < safeLimit) {
+    const order = values
+      .map((value, idx) => ({ idx, value }))
+      .sort((a, b) => b.value - a.value)
+      .map((x) => x.idx);
+    let remainder = safeLimit - scaledTotal;
+    let cursor = 0;
+    while (remainder > 0 && order.length > 0) {
+      scaledValues[order[cursor % order.length]] += 1;
+      remainder -= 1;
+      cursor += 1;
+    }
+  }
+
+  ids.forEach((id, idx) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.value = scaledValues[idx];
+    }
+  });
+}
+
 // Build a canonical Topaz-shaped payload so we can persist full parity fields
 // while the UI is still on the simplified form.
 function buildTopaxPayload(decisions) {
@@ -520,6 +566,10 @@ function randomizeDecisions() {
   document.getElementById('northUnitsP2').value = Math.floor(northUnits * 0.25);
   document.getElementById('northUnitsP3').value = Math.floor(northUnits * 0.2);
   document.getElementById('rawMaterialUnits').value = Math.floor(productionVolume * 1.5);
+
+  // Ensure generated multi-product delivery plan remains under validator threshold.
+  const maxAllowedProduction = Math.floor(capacity * 1.1);
+  clampDeliveryPlanToLimit(maxAllowedProduction);
 
   // Keep compatibility fields in sync for current simulator validation.
   document.getElementById('salesForce').value = randomStep(5000, 20000, 1000);
